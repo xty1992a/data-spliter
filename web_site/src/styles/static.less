@@ -1,0 +1,184 @@
+.flex-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-yellow {
+  color: @price-color;
+}
+
+.text-blue {
+  color: @active-color;
+}
+
+.text-red {
+  color: @red-color;
+}
+
+.shadow-normal {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-press {
+  box-shadow: 0 3px 2px 0 rgba(0, 0, 0, 0.2);
+
+  &:active {
+    transform: translate(1px, 2px);
+    box-shadow: inset 1px 2px 1px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.1s;
+  }
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pre-input-border {
+  &:focus {
+    & + .input-border {
+      border-color: @active-color;
+    }
+  }
+}
+
+.input-border {
+  border-radius: @border-radius-middle;
+  border: 1px solid transparent;
+  pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  top: 0;
+  left: 0;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  49% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-height: 768px) {
+  html {
+    .discount {
+      .conflict-discount {
+        height: 42px;
+        margin-bottom: 8px;
+      }
+    }
+
+    .paytype-picker .paytype-item svg {
+      font-size: 40px;
+    }
+
+    .confirm-btn {
+      button {
+        height: 70px;
+      }
+
+      b {
+        font-size: 26px;
+      }
+    }
+  }
+}
+
+@media screen and (max-height: 640px) {
+  html {
+    #app > .el-row > .el-col > nav,
+    #app > .el-row > .el-col > section {
+      margin-right: 10px;
+    }
+
+    .gas-panel,
+    .member-reader {
+      font-size: 17px;
+    }
+
+    #app .main {
+      padding: 10px 0;
+
+      .paytype-item {
+        font-size: 14px;
+      }
+    }
+
+    #app .page-right {
+      overflow: hidden;
+
+      .main-top {
+        padding-bottom: 8px;
+      }
+
+      .main-bottom-item {
+        margin-bottom: 6px;
+      }
+
+      .rest-value {
+        height: 40px;
+
+        .value {
+          font-size: 26px;
+        }
+      }
+
+      .paytype-picker {
+        padding: 8px 14px;
+      }
+
+      .confirm-btn {
+        button {
+          height: 60px;
+        }
+
+        b {
+          font-size: 26px;
+        }
+      }
+    }
+
+    .paytype-picker .paytype-item svg {
+      font-size: 40px;
+    }
+
+    .discount {
+      padding-top: 4px;
+
+      .conflict-title {
+        line-height: 28px;
+        margin-bottom: 7px;
+      }
+
+      .discount-panel {
+        font-size: 15px;
+        padding: 5px 12px;
+      }
+
+      .conflict-discount {
+        margin-bottom: 6px;
+        height: 40px;
+
+        .sub-label {
+          font-size: 14px;
+        }
+
+        .value {
+          font-size: 15px;
+        }
+      }
+    }
+  }
+}
