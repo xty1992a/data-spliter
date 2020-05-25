@@ -42,6 +42,8 @@
 
         const result = await uploader.upload()
 
+        e.target.value = null
+
 /*		if (!file.type.includes('image')) {
 		  e.target.value = null;
 		  return;

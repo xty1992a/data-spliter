@@ -1,22 +1,71 @@
 import SparkMd5 from "spark-md5";
 import * as API from "@/api";
 
-const dftOptions = {
-  chunkSize: 1024 * 1024, // 分块大小
-};
 const blobSlice =
   File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
 
+const dftOptions = {
+  chunkSize: 1024 * 1024, // 分块大小
+};
 export default class FileUploader {
+  state = {
+    md5: "",
+    chunkList: [],
+    chunkSize: 0,
+    fileSize: 0,
+    taskMap: {},
+  };
+
+  get taskIds() {
+    return Object.keys(this.state.taskMap).filter(
+      (k) => !this.state.taskMap[k]
+    );
+  }
+
   constructor(file, opt = {}) {
     this.$file = file;
+    this.state.fileSize = file.size;
     this.$options = { ...dftOptions, ...opt };
-    this.chunkBox = [];
   }
 
   async upload() {
-    const result = await this.check();
-    console.log(result);
+    const check = await this.check();
+    if (!check.success) return check;
+    check.data.forEach((id) => (this.state.taskMap[id] = true));
+    // console.log(this.state);
+    const upload = await this.doUpload();
+    // console.log(upload);
+    if (!upload.success) return upload;
+
+    return API.uploadOk({
+      name: this.$file.name,
+      size: this.$file.size,
+      type: this.$file.type,
+      md5: this.state.md5,
+      chunkSize: this.state.chunkSize,
+    });
+  }
+
+  async doUpload() {
+    const task = this.taskIds;
+    const result = await Promise.all(task.map((id) => this.uploadChunk(id)));
+    if (result.some((it) => !it.success))
+      return {
+        success: false,
+        message: "上传失败,请稍后重试!",
+      };
+    return { success: true, message: "所有分块上传成功!" };
+  }
+
+  async uploadChunk(id) {
+    const data = {
+      file: new Blob([this.state.chunkList[id]]),
+      total: this.state.chunkSize,
+      md5: this.state.md5,
+      id,
+    };
+
+    return API.uploadChunk(data);
   }
 
   error(message) {
@@ -30,19 +79,24 @@ export default class FileUploader {
   // 检查服务端是否存在未完成的断点,没有则创建
   async check() {
     const md5 = await this.fileMd5(this.$file);
+    this.state.chunkSize = this.state.chunkList.length;
+    this.state.md5 = md5.data;
+    this.state.taskMap = [...Array(this.state.chunkSize)].reduce(
+      (p, n, i) => ({ ...p, [i]: false }),
+      {}
+    );
     if (!md5.success) return this.error("md5 解析失败!");
-    const res = await API.check({ md5: md5.data });
-    if (!res.success) return this.error("服务端检查失败!");
-    return {
-      success: true,
-      data: md5.data,
-    };
+
+    return API.check({ md5: md5.data });
   }
 
   // 生成文件hash
   fileMd5(file) {
     return new Promise((resolve) => {
-      const { chunkSize, chunkBox } = this;
+      const {
+        $options: { chunkSize },
+        state: { chunkList },
+      } = this;
       const chunks = Math.ceil(file.size / chunkSize);
       let currentChunk = 0;
       const spark = new SparkMd5.ArrayBuffer();
@@ -51,7 +105,7 @@ export default class FileUploader {
       fileReader.onload = (e) => {
         console.log("read chunk nr", currentChunk + 1, "of", chunks);
         spark.append(e.target.result);
-        chunkBox.push(e.target.result);
+        chunkList.push(e.target.result);
         currentChunk++;
 
         if (currentChunk >= chunks)

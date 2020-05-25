@@ -1,6 +1,6 @@
 import request from "./request";
 
-export const uploadFile = async (data) => {
+function data2form(data) {
   if (!(data instanceof FormData)) {
     const oldData = data;
     data = new FormData();
@@ -8,7 +8,26 @@ export const uploadFile = async (data) => {
       data.append(key, oldData[key]);
     });
   }
-  return request({ url: "/api/upload", data, method: "POST", headers: {} });
-};
+  return data;
+}
+
+export const uploadFile = (data) =>
+  request({
+    url: "/api/upload",
+    data: data2form(data),
+    method: "POST",
+    headers: {},
+  });
 
 export const check = (data) => request({ url: "/api/check", data });
+
+// 上传分块
+export const uploadChunk = (data) =>
+  request({
+    url: "/api/uploadChunk",
+    data: data2form(data),
+    method: "POST",
+    headers: {},
+  });
+
+export const uploadOk = (data) => request({ url: "/api/complete", data });
