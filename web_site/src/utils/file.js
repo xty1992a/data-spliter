@@ -11,7 +11,7 @@ export default class FileUploader {
   state = {
     md5: "",
     chunkList: [],
-    chunkSize: 0,
+    chunkLength: 0,
     fileSize: 0,
     taskMap: {},
   };
@@ -32,9 +32,7 @@ export default class FileUploader {
     const check = await this.check();
     if (!check.success) return check;
     check.data.forEach((id) => (this.state.taskMap[id] = true));
-    // console.log(this.state);
     const upload = await this.doUpload();
-    // console.log(upload);
     if (!upload.success) return upload;
 
     return API.uploadOk({
@@ -42,7 +40,7 @@ export default class FileUploader {
       size: this.$file.size,
       type: this.$file.type,
       md5: this.state.md5,
-      chunkSize: this.state.chunkSize,
+      chunkLength: this.state.chunkLength,
     });
   }
 
@@ -60,7 +58,7 @@ export default class FileUploader {
   async uploadChunk(id) {
     const data = {
       file: new Blob([this.state.chunkList[id]]),
-      total: this.state.chunkSize,
+      total: this.state.chunkLength,
       md5: this.state.md5,
       id,
     };
@@ -79,9 +77,9 @@ export default class FileUploader {
   // 检查服务端是否存在未完成的断点,没有则创建
   async check() {
     const md5 = await this.fileMd5(this.$file);
-    this.state.chunkSize = this.state.chunkList.length;
+    this.state.chunkLength = this.state.chunkList.length;
     this.state.md5 = md5.data;
-    this.state.taskMap = [...Array(this.state.chunkSize)].reduce(
+    this.state.taskMap = [...Array(this.state.chunkLength)].reduce(
       (p, n, i) => ({ ...p, [i]: false }),
       {}
     );
