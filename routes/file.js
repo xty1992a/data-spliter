@@ -61,7 +61,13 @@ function complete(state) {
       if (!result.success) return result;
       fs.rmdir(dir, (err) => {
         if (err) return resolve({ success: false, message: "合并失败!", err });
-        resolve({ success: true, message: "上传成功!" });
+        resolve({
+          success: true,
+          message: "上传成功!",
+          data: {
+            path: "/resources/" + state.name,
+          },
+        });
       });
     });
   });
@@ -71,7 +77,7 @@ function mergeFile(state) {
   return new Promise((resolve) => {
     const dir = temp(state.md5);
     const out = fs.createWriteStream(
-      path.resolve(__dirname, "../data/" + state.name)
+      path.resolve(__dirname, "../public/resources/" + state.name)
     );
     fs.readdir(dir, async (err, file) => {
       file = sort(file);

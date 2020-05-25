@@ -7,6 +7,10 @@ module.exports = (config) => {
         target: "http://localhost:3000",
         changeOrigin: true,
       },
+      "/resources/*": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
     },
   };
 };

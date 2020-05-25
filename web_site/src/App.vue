@@ -1,6 +1,7 @@
 <template>
   <div class="app">
-    <Uploader/>
+    <Uploader v-model="path"/>
+    <video :src="path" controls/>
   </div>
 </template>
 
@@ -11,7 +12,9 @@
 	props: {},
     components: {Uploader},
 	data() {
-	  return {};
+	  return {
+		path: ''
+      };
 	},
 	computed: {},
 	methods: {},

@@ -41,8 +41,10 @@
 		const uploader = new FileUploader(file, {})
 
         const result = await uploader.upload()
-
         e.target.value = null
+        if(!result.success) return
+        console.log(result)
+        this.$emit('input', result.data.path)
 
 /*		if (!file.type.includes('image')) {
 		  e.target.value = null;
