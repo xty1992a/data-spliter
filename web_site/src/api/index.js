@@ -22,12 +22,16 @@ export const uploadFile = (data) =>
 export const check = (data) => request({ url: "/api/check", data });
 
 // 上传分块
-export const uploadChunk = (data) =>
-  request({
-    url: "/api/uploadChunk",
-    data: data2form(data),
-    method: "POST",
-    headers: {},
-  });
+export const uploadChunk = (data, onProgress) =>
+  request(
+    {
+      url: "/api/uploadChunk",
+      data: data2form(data),
+      method: "POST",
+      headers: {},
+      onUploadProgress: onProgress,
+    },
+    { loading: false }
+  );
 
 export const uploadOk = (data) => request({ url: "/api/complete", data });

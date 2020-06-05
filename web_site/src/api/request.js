@@ -30,7 +30,7 @@ const dftOpt = {
 };
 
 export default function request(
-  { method = "post", data, url, headers = {} },
+  { method = "post", data, url, headers = {}, onUploadProgress },
   opt = {}
 ) {
   opt = { ...dftOpt, ...opt };
@@ -47,6 +47,7 @@ export default function request(
       data,
       params,
       headers,
+      onUploadProgress,
     })
       .then((res) => {
         opt.loading && Loading.service().close();

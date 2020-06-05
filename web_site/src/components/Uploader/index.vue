@@ -1,31 +1,39 @@
 <template>
-  <el-button class="uploader" :size="size" :type="btnType">
-    <span>{{text}}</span>
-    <input type="file" @change="upload">
-  </el-button>
+  <div class="uploader-wrap">
+    <el-button class="uploader" :size="size" :type="btnType">
+      <span>{{text}}</span>
+      <input type="file" @change="upload">
+    </el-button>
+    <div class="chunk-list">
+      <div class="chunk-cell" v-for="it in chunk" :key="it.id">
+        <div class="chunk-progress" :style="{width: it.progress*100 + '%'}"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-  import {uploadFile} from '@/api';
-  import FileUploader from '@/utils/file'
+  import FileUploader from '@/utils/file';
 
   export default {
 	name: 'Uploader',
 	components: {},
 	props: {
 	  text: {
-	    type: String,
-        default: '上传图片'
-      },
+		type: String,
+		default: '点击上传'
+	  },
 	  value: String,
 	  size: {
 		type: String,
 		default: 'small'
 	  },
-      btnType: String
+	  btnType: String
 	},
 	data() {
-	  return {};
+	  return {
+	    chunk: []
+      };
 	},
 	created() {
 	},
@@ -38,23 +46,22 @@
 		  return;
 		}
 		const file = files[0];
-		const uploader = new FileUploader(file, {})
+		const uploader = new FileUploader(file, {
+		  chunkSize: 1024 * 1024 //* 5
+		});
 
-        const result = await uploader.upload()
-        e.target.value = null
-        if(!result.success) return
-        console.log(result)
-        this.$emit('input', result.data.path)
+		uploader.on('before-upload', task => {
+		  this.chunk = task
+        })
+		uploader.on('progress', task => {
+		  this.chunk = task
+        })
 
-/*		if (!file.type.includes('image')) {
-		  e.target.value = null;
-		  return;
-		}
-		const result = await uploadFile({file});
+		const result = await uploader.upload();
 		e.target.value = null;
-		console.log(result);
 		if (!result.success) return;
-		this.$emit('input', '/' + result.value);*/
+		console.log(result);
+		this.$emit('input', result.data.path);
 	  }
 	},
 	computed: {}
@@ -73,6 +80,20 @@
       top: 0;
       left: 0;
       opacity: 0;
+    }
+  }
+
+  .chunk-list{
+    font-size: 0;
+    .chunk-cell{
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 1px solid #e5e5e5;
+      .chunk-progress{
+        height: 100%;
+        background-color: #5daf34;
+      }
     }
   }
 </style>
